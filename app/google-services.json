@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "53161129514",
+    "firebase_url": "https://notesapp-4e20d.firebaseio.com",
+    "project_id": "notesapp-4e20d",
+    "storage_bucket": "notesapp-4e20d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53161129514:android:0be744f5bdec3b54df3553",
+        "android_client_info": {
+          "package_name": "com.dtag.notesapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "53161129514-t3o2i917gl1042grrgghi4mqp89qjr3r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dtag.notesapp",
+            "certificate_hash": "de54b166f5109c27f57f6c4f1d3f2c353f6d544e"
+          }
+        },
+        {
+          "client_id": "53161129514-bal0k00gngm174gl9ektuj4519jshgst.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg5JrgWNwx34WVdzss1fAgIQI9zpQKOaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53161129514-bal0k00gngm174gl9ektuj4519jshgst.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
