@@ -3,11 +3,48 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/notesListFragment">
-
+    app:startDestination="@id/loginFragment">
     <fragment
-        android:id="@+id/notesListFragment"
+        android:id="@+id/loginFragment"
+        android:name="com.dtag.notesapp.ui.login.LoginFragment"
+        android:label="login_fragment"
+        tools:layout="@layout/login_fragment" >
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_notesListFragment2"
+            app:destination="@id/notesListFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/addNoteFragment"
+        android:name="com.dtag.notesapp.ui.addNote.AddNoteFragment"
+        android:label="fragment_add_note"
+        tools:layout="@layout/fragment_add_note" />
+    <fragment
+        android:id="@+id/notesListFragment2"
         android:name="com.dtag.notesapp.ui.noteslist.NotesListFragment"
         android:label="notes_list_fragment"
-        tools:layout="@layout/notes_list_fragment" />
+        tools:layout="@layout/notes_list_fragment" >
+        <action
+            android:id="@+id/action_notesListFragment2_to_updateNoteFragment"
+            app:destination="@id/updateNoteFragment" />
+        <action
+            android:id="@+id/action_notesListFragment2_to_addNoteFragment"
+            app:destination="@id/addNoteFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.dtag.notesapp.ui.register.RegisterFragment"
+        android:label="register_fragment"
+        tools:layout="@layout/register_fragment" >
+        <action
+            android:id="@+id/action_registerFragment_to_notesListFragment2"
+            app:destination="@id/notesListFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/updateNoteFragment"
+        android:name="com.dtag.notesapp.ui.updateNote.UpdateNoteFragment"
+        android:label="update_note_fragment"
+        tools:layout="@layout/update_note_fragment" />
 </navigation>
