@@ -88,6 +88,7 @@ public class NotesListFragment extends Fragment implements View.OnClickListener,
                 mNotesAdapter.updateNotes(notes);
             }
         });
+
     }
 
     @Override
@@ -105,4 +106,5 @@ public class NotesListFragment extends Fragment implements View.OnClickListener,
         mNavController.navigate(NotesListFragmentDirections.actionNotesListFragmentToUpdateNoteFragment(note));
 
     }
+
 }

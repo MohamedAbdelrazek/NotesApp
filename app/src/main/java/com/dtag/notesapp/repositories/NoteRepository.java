@@ -16,9 +16,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NoteRepository {
@@ -27,7 +31,8 @@ public class NoteRepository {
     private LiveData<List<Note>> mAllNotes;
     private FirebaseAuth mAuth;
     private String TAG = "zoka";
-    DatabaseReference myRef;
+    DatabaseReference mUserDbRef;
+    DatabaseReference mNoteDbRef;
 
 
     public NoteRepository(Application application) {
@@ -35,16 +40,33 @@ public class NoteRepository {
         mNoteDao = noteDataBase.noteDao();
         mAllNotes = mNoteDao.getAllNotes();
         mAuth = FirebaseAuth.getInstance();
-        myRef = FirebaseDatabase.getInstance().getReference("Users");
+        mUserDbRef = FirebaseDatabase.getInstance().getReference("Users");
+        if (null != FirebaseAuth.getInstance().getCurrentUser()) {
+            mNoteDbRef = mUserDbRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Notes");
+            getFirebaseNotes();
+        }
+
 
     }
 
     public NoteRepository() {
         mAuth = FirebaseAuth.getInstance();
-        myRef = FirebaseDatabase.getInstance().getReference("Users");
+        mUserDbRef = FirebaseDatabase.getInstance().getReference("Users");
     }
 
     public void insert(final Note note) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                long id = mNoteDao.insert(note);
+                note.setId((int) id);
+                mNoteDbRef.child(String.valueOf(id)).setValue(note);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void insert(final List<Note> note) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -59,6 +81,7 @@ public class NoteRepository {
             @Override
             protected Void doInBackground(Void... voids) {
                 mNoteDao.update(note);
+                mNoteDbRef.child("" + note.getId()).setValue(note);
                 return null;
             }
         }.execute();
@@ -69,6 +92,7 @@ public class NoteRepository {
             @Override
             protected Void doInBackground(Void... voids) {
                 mNoteDao.delete(note);
+                mNoteDbRef.child("" + note.getId()).removeValue();
                 return null;
             }
         }.execute();
@@ -83,6 +107,7 @@ public class NoteRepository {
             }
         }.execute();
     }
+
 
     // Room DB executes LiveData Types in the back ground so we don't need to wrap this fun in AsyncTask....
     public LiveData<List<Note>> getAllNotes() {
@@ -102,7 +127,7 @@ public class NoteRepository {
                             registerState.postSuccess(true);
 
                             String uid = mAuth.getCurrentUser().getUid();
-                            myRef.child(uid).child("UserInfo ").setValue(new UserModel(email, displayName));
+                            mUserDbRef.child(uid).child("UserInfo ").setValue(new UserModel(email, displayName));
 
 
                         } else {
@@ -138,5 +163,96 @@ public class NoteRepository {
                     }
                 });
         return loginState;
+    }
+
+
+    private void getFirebaseNotes() {
+        mNoteDbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                List<Note> allNotes = new ArrayList<>();
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Note note = postSnapshot.getValue(Note.class);
+                    allNotes.add(note);
+                }
+
+                syncNotes(allNotes);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void syncNotes(List<Note> remote) {
+        try {
+
+            List<Note> local = getAllNotes().getValue();
+
+            if (equalLists(local, remote)) {
+                Log.i(TAG, "syncNotes: two lists are equal");
+                return;
+            }
+            List<Note> allNotes = new ArrayList<>(local);
+
+            for (int i = 0; i < local.size(); i++) {
+                for (int j = 0; j < remote.size(); j++) {
+
+                    if (local.get(i).getId() == remote.get(j).getId()) {
+                        allNotes.remove(local.get(i));
+                    }
+                }
+            }
+            allNotes.addAll(remote);
+            Log.i(TAG, "syncNotes:" + allNotes.size());
+            updateFirebaseAndLocalDataBase(allNotes);
+        } catch (NullPointerException e) {
+            Log.i(TAG, "syncNotes: " + e.getMessage());
+
+        }
+    }
+
+    private void updateFirebaseAndLocalDataBase(List<Note> allNotes) {
+        Log.i(TAG, "loop!!");
+        if (getAllNotes().getValue().size() == 0) {
+            Log.i(TAG, "LocalDataBase:=  0");
+            insert(allNotes);
+            return;
+        }
+        //update Room db
+        Log.i(TAG, "updateFirebaseAndLocalDataBase: Both !!");
+          deleteAllNotes();
+          insert(allNotes);
+
+//        mNoteDbRef.removeValue();
+//
+//        for (Note note : allNotes) {
+//            mNoteDbRef.child(String.valueOf(note.getId())).setValue(note);
+//        }
+//        //insert(allNotes);
+
+    }
+
+    public boolean equalLists(List<Note> a, List<Note> b) {
+        // Check for sizes and nulls
+        boolean isEqual = true;
+        if (a.size() != b.size()) {
+            return false;
+        }
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (a.get(i).getId() == b.get(j).getId()) {
+                    isEqual = true;
+                    continue;
+                } else {
+                    isEqual = false;
+                }
+            }
+        }
+        return isEqual;
     }
 }

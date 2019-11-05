@@ -29,6 +29,10 @@ public class Note implements Serializable {
         this.priority = priority;
     }
 
+    public Note() {
+
+    }
+
 
     @Ignore
     public Note(int id, String title, String description, int priority) {
@@ -50,11 +54,23 @@ public class Note implements Serializable {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public int getPriority() {
         return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }
