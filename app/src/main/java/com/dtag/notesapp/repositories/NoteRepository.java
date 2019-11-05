@@ -33,6 +33,7 @@ public class NoteRepository {
     private String TAG = "zoka";
     DatabaseReference mUserDbRef;
     DatabaseReference mNoteDbRef;
+    private ValueEventListener valueEventListener;
 
 
     public NoteRepository(Application application) {
@@ -122,17 +123,13 @@ public class NoteRepository {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
                             registerState.postSuccess(true);
-
                             String uid = mAuth.getCurrentUser().getUid();
                             mUserDbRef.child(uid).child("UserInfo ").setValue(new UserModel(email, displayName));
 
 
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.d(TAG, "createUserWithEmail:failure", task.getException());
+
                             registerState.postError(task.getException());
                         }
                     }
@@ -149,13 +146,12 @@ public class NoteRepository {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
+
                             loginState.postSuccess(true);
 
 
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.d(TAG, "signInWithEmail:failure", task.getException());
                             loginState.postError(task.getException());
                         }
 
@@ -167,7 +163,7 @@ public class NoteRepository {
 
 
     private void getFirebaseNotes() {
-        mNoteDbRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = mNoteDbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -176,9 +172,7 @@ public class NoteRepository {
                     Note note = postSnapshot.getValue(Note.class);
                     allNotes.add(note);
                 }
-
                 syncNotes(allNotes);
-
             }
 
             @Override
@@ -190,13 +184,13 @@ public class NoteRepository {
 
     private void syncNotes(List<Note> remote) {
         try {
-
             List<Note> local = getAllNotes().getValue();
-
             if (equalLists(local, remote)) {
-                Log.i(TAG, "syncNotes: two lists are equal");
+
                 return;
             }
+
+
             List<Note> allNotes = new ArrayList<>(local);
 
             for (int i = 0; i < local.size(); i++) {
@@ -208,6 +202,7 @@ public class NoteRepository {
                 }
             }
             allNotes.addAll(remote);
+
             updateFirebaseAndLocalDataBase(allNotes);
         } catch (NullPointerException e) {
             Log.i(TAG, "syncNotes: " + e.getMessage());
@@ -216,6 +211,7 @@ public class NoteRepository {
     }
 
     private void updateFirebaseAndLocalDataBase(List<Note> allNotes) {
+        mNoteDbRef.removeEventListener(valueEventListener);
         if (getAllNotes().getValue().size() == 0) {
             insert(allNotes);
             return;
@@ -224,17 +220,14 @@ public class NoteRepository {
         deleteAllNotes();
         insert(allNotes);
 
-//        mNoteDbRef.removeValue();
-//
-//        for (Note note : allNotes) {
-//            mNoteDbRef.child(String.valueOf(note.getId())).setValue(note);
-//        }
-//        //insert(allNotes);
+        mNoteDbRef.removeValue();
 
+        for (Note note : allNotes) {
+            mNoteDbRef.child(String.valueOf(note.getId())).setValue(note);
+        }
     }
 
     public boolean equalLists(List<Note> a, List<Note> b) {
-        // Check for sizes and nulls
         boolean isEqual = true;
         if (a.size() != b.size()) {
             return false;
