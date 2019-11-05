@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -11,7 +12,8 @@ import java.util.List;
 
 @Dao
 public interface NoteDao {
-    @Insert
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insert(Note note);
 
     @Update
@@ -27,7 +29,7 @@ public interface NoteDao {
     @Query("Select * From notes_table order by priority_column asc")
     LiveData<List<Note>> getAllNotes();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(List<Note> allNotes);
 }
 

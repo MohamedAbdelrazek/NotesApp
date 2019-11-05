@@ -208,7 +208,6 @@ public class NoteRepository {
                 }
             }
             allNotes.addAll(remote);
-            Log.i(TAG, "syncNotes:" + allNotes.size());
             updateFirebaseAndLocalDataBase(allNotes);
         } catch (NullPointerException e) {
             Log.i(TAG, "syncNotes: " + e.getMessage());
@@ -217,16 +216,13 @@ public class NoteRepository {
     }
 
     private void updateFirebaseAndLocalDataBase(List<Note> allNotes) {
-        Log.i(TAG, "loop!!");
         if (getAllNotes().getValue().size() == 0) {
-            Log.i(TAG, "LocalDataBase:=  0");
             insert(allNotes);
             return;
         }
         //update Room db
-        Log.i(TAG, "updateFirebaseAndLocalDataBase: Both !!");
-          deleteAllNotes();
-          insert(allNotes);
+        deleteAllNotes();
+        insert(allNotes);
 
 //        mNoteDbRef.removeValue();
 //
