@@ -17,9 +17,10 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import com.dtag.notesapp.livedatawrapper.NoteState;
 import com.dtag.notesapp.R;
 import com.dtag.notesapp.databinding.LoginFragmentBinding;
+import com.dtag.notesapp.livedatawrapper.NoteState;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
     private String TAG = "zoka";
@@ -41,6 +42,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         dialog = new ProgressDialog(getContext());
         dialog.setMessage("Loading");
         dialog.setCancelable(false);
+
         return rootView;
     }
 
@@ -53,6 +55,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         mLoginFragmentBinding.loginLaterButton.setOnClickListener(this);
         mLoginFragmentBinding.registerTextView.setOnClickListener(this);
         mLoginFragmentBinding.loginButton.setOnClickListener(this);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            mNavController.navigate(LoginFragmentDirections.actionLoginFragmentToNotesListFragment());
+        }
     }
 
     @Override
@@ -75,12 +81,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     public void onChanged(NoteState<Boolean> booleanStateData) {
                         switch (booleanStateData.getStatus()) {
                             case SUCCESS:
-                                //
-                                // nav to list fragment.....
                                 dialog.dismiss();
-                                Toast.makeText(getContext(), "SUCCESS", Toast.LENGTH_SHORT).show();
                                 mNavController.navigate(LoginFragmentDirections.actionLoginFragmentToNotesListFragment());
-
                                 break;
                             case ERROR:
                                 Throwable e = booleanStateData.getError();

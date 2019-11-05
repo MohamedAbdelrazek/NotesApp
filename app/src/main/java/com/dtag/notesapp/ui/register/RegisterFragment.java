@@ -17,9 +17,9 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import com.dtag.notesapp.livedatawrapper.NoteState;
 import com.dtag.notesapp.R;
 import com.dtag.notesapp.databinding.RegisterFragmentBinding;
+import com.dtag.notesapp.livedatawrapper.NoteState;
 
 public class RegisterFragment extends Fragment implements View.OnClickListener {
 
@@ -77,6 +77,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                     switch (booleanNoteState.getStatus()) {
                         case SUCCESS:
                             Toast.makeText(getContext(), "Welcome !", Toast.LENGTH_SHORT).show();
+                            mNavController.popBackStack(R.id.notesListFragment, true);
+                            //navController.navigate(R.id.fragment_company);
+                            mNavController.navigate(RegisterFragmentDirections.actionRegisterFragmentToNotesListFragment());
                             dialog.dismiss();
                             // nav to list fragment.....
 
